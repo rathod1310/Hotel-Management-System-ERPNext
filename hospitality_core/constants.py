@@ -2,11 +2,12 @@
 
 class RoomStatus:
     AVAILABLE = "Available"
+    RESERVED = "Reserved"
     OCCUPIED = "Occupied"
     DIRTY = "Dirty"
     OUT_OF_ORDER = "Out of Order"
 
-    ALL = (AVAILABLE, OCCUPIED, DIRTY, OUT_OF_ORDER)
+    ALL = (AVAILABLE, RESERVED, OCCUPIED, DIRTY, OUT_OF_ORDER)
 
 
 class ReservationStatus:

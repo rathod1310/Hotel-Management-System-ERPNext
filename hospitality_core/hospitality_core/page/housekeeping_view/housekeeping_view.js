@@ -35,6 +35,9 @@ frappe.pages['housekeeping_view'].on_page_load = function (wrapper) {
         .hk-card.status-occupied {
             border-color: #212529;
         }
+        .hk-card.status-reserved {
+            border-color: #17a2b8;
+        }
         .hk-card.status-dirty {
             border-color: #ffc107;
         }
@@ -125,6 +128,9 @@ function render_grid(wrapper, rooms) {
         } else if (room.status === 'Occupied') {
             borderClass = 'status-occupied';
             actionBtnHtml = `<button class="hk-btn-action hk-btn-mark-dirty" onclick="handle_action('${room.name}', 'mark_dirty')">${__("Mark Dirty")}</button>`;
+        } else if (room.status === 'Reserved') {
+            borderClass = 'status-reserved';
+            actionBtnHtml = `<button class="hk-btn-action hk-btn-disabled" disabled>${__("Reserved")}</button>`;
         } else if (room.status === 'Dirty') {
             borderClass = 'status-dirty';
             actionBtnHtml = `<button class="hk-btn-action hk-btn-mark-clean" onclick="handle_action('${room.name}', 'mark_clean')">${__("Mark Clean")}</button>`;
@@ -167,4 +173,3 @@ window.handle_action = function (room_name, action) {
         }
     });
 };
-

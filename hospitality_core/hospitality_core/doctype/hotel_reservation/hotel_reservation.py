@@ -27,10 +27,61 @@ class HotelReservation(Document):
                 "rate": rate,
                 "nights": nights
             })
+        elif len(self.stays) == 1:
+            stay = self.stays[0]
+            if self.room and stay.room != self.room:
+                stay.room = self.room
+            if self.room_type and stay.room_type != self.room_type:
+                stay.room_type = self.room_type
+            stay.from_date = self.check_in_date
+            stay.to_date = self.check_out_date
+            stay.nights = max(date_diff(self.check_out_date, self.check_in_date), 1)
+        else:
+            # Multi-segment stay: ensure last stay finishes on check_out_date
+            last_stay = self.stays[-1]
+            if getdate(last_stay.to_date) != getdate(self.check_out_date):
+                last_stay.to_date = self.check_out_date
+                last_stay.nights = max(date_diff(self.check_out_date, last_stay.from_date), 1)
+
+        for s in self.stays:
+            if s.to_date and getdate(s.to_date) < getdate(s.from_date):
+                frappe.throw(_("Stay to_date ({0}) cannot be before from_date ({1}) for room {2}.").format(
+                    s.to_date, s.from_date, s.room
+                ))
 
         # Validate room availability if Reserved
         if self.status == ReservationStatus.RESERVED:
             self.validate_room_availability()
+
+    def on_update(self):
+        if self.status == ReservationStatus.RESERVED:
+            if self.room:
+                old_doc = self.get_doc_before_save()
+                if old_doc and old_doc.room and old_doc.room != self.room:
+                    try:
+                        old_room_doc = frappe.get_doc("Hotel Room", old_doc.room)
+                        if old_room_doc.current_reservation == self.name:
+                            set_room_status(old_doc.room, RoomStatus.AVAILABLE, reason=f"Room changed in reservation {self.name}")
+                    except Exception:
+                        pass
+                set_room_status(self.room, RoomStatus.RESERVED, reason=f"Reserved by {self.name}", reservation=self.name)
+        elif self.status == ReservationStatus.CANCELLED:
+            if self.room:
+                try:
+                    room_doc = frappe.get_doc("Hotel Room", self.room)
+                    if room_doc.current_reservation == self.name:
+                        set_room_status(self.room, RoomStatus.AVAILABLE, reason=f"Reservation {self.name} cancelled")
+                except Exception:
+                    pass
+
+    def on_trash(self):
+        if self.room:
+            try:
+                room_doc = frappe.get_doc("Hotel Room", self.room)
+                if room_doc.current_reservation == self.name:
+                    set_room_status(self.room, RoomStatus.AVAILABLE, reason=f"Reservation {self.name} deleted")
+            except Exception:
+                pass
 
     def validate_room_availability(self):
         """
@@ -43,20 +94,35 @@ class HotelReservation(Document):
         if not room_doc.is_enabled:
             frappe.throw(_("Room {0} is disabled.").format(self.room))
 
+        # Prevent booking Dirty rooms
+        if room_doc.status == RoomStatus.DIRTY:
+            frappe.throw(_("Room {0} is currently Dirty. It cannot be booked until cleaned.").format(self.room))
+
         # Check if Out of Order on arrival
         if room_doc.status == RoomStatus.OUT_OF_ORDER:
             frappe.throw(_("Room {0} is currently Out of Order.").format(self.room))
 
+        # Check if currently Occupied
+        if room_doc.status == RoomStatus.OCCUPIED and room_doc.current_reservation != self.name:
+            frappe.throw(_("Room {0} is currently Occupied.").format(self.room))
+
+        # Check if Reserved by another reservation
+        if room_doc.status == RoomStatus.RESERVED and room_doc.current_reservation and room_doc.current_reservation != self.name:
+            frappe.throw(_("Room {0} is already Reserved by reservation {1}.").format(self.room, room_doc.current_reservation))
+
         # Check overlapping reservations
         overlapping = frappe.db.sql("""
-            SELECT r.name, s.room, s.from_date, s.to_date
+            SELECT r.name, COALESCE(s.room, r.room) as room, s.from_date, s.to_date
             FROM `tabHotel Reservation` r
-            JOIN `tabHotel Reservation Stay` s ON s.parent = r.name
-            WHERE s.room = %(room)s
+            LEFT JOIN `tabHotel Reservation Stay` s ON s.parent = r.name
+            WHERE COALESCE(s.room, r.room) = %(room)s
             AND r.name != %(name)s
             AND r.status IN ('Reserved', 'Checked In')
-            AND s.from_date < %(check_out)s
-            AND (s.to_date > %(check_in)s OR s.to_date IS NULL)
+            AND (
+                (s.from_date < %(check_out)s AND (s.to_date > %(check_in)s OR s.to_date IS NULL))
+                OR
+                (r.check_in_date < %(check_out)s AND r.check_out_date > %(check_in)s)
+            )
         """, {
             "room": self.room,
             "name": self.name or "New Reservation",
@@ -78,27 +144,39 @@ def get_available_rooms(room_type, check_in_date, check_out_date, exclude_reserv
     all_rooms = frappe.get_all(
         "Hotel Room",
         filters={"room_type": room_type, "is_enabled": 1},
-        fields=["name", "room_number", "status", "floor"]
+        fields=["name", "room_number", "status", "floor", "current_reservation"]
     )
 
-    # Exclude currently Out of Order and Dirty rooms from selection
-    all_rooms = [r for r in all_rooms if r.status not in (RoomStatus.OUT_OF_ORDER, RoomStatus.DIRTY)]
+    # Exclude currently Out of Order, Dirty, Occupied, and Reserved rooms from selection
+    def is_room_selectable(r):
+        if r.status in (RoomStatus.OUT_OF_ORDER, RoomStatus.DIRTY, RoomStatus.OCCUPIED):
+            return False
+        if r.status == RoomStatus.RESERVED:
+            if exclude_reservation and r.current_reservation == exclude_reservation:
+                return True
+            return False
+        return True
+
+    all_rooms = [r for r in all_rooms if is_room_selectable(r)]
 
     booked_rooms = frappe.db.sql("""
-        SELECT DISTINCT s.room
+        SELECT DISTINCT COALESCE(s.room, r.room) as room
         FROM `tabHotel Reservation` r
-        JOIN `tabHotel Reservation Stay` s ON s.parent = r.name
+        LEFT JOIN `tabHotel Reservation Stay` s ON s.parent = r.name
         WHERE r.status IN ('Reserved', 'Checked In')
         AND r.name != %(exclude_res)s
-        AND s.from_date < %(check_out)s
-        AND (s.to_date > %(check_in)s OR s.to_date IS NULL)
+        AND (
+            (s.from_date < %(check_out)s AND (s.to_date > %(check_in)s OR s.to_date IS NULL))
+            OR
+            (r.check_in_date < %(check_out)s AND r.check_out_date > %(check_in)s)
+        )
     """, {
         "exclude_res": exclude_reservation or "None",
         "check_in": check_in_date,
         "check_out": check_out_date
     }, as_dict=True)
 
-    booked_room_names = {b.room for b in booked_rooms}
+    booked_room_names = {b.room for b in booked_rooms if b.room}
     return [r for r in all_rooms if r.name not in booked_room_names]
 
 
@@ -168,11 +246,18 @@ def check_in(reservation_name):
         frappe.throw(_("Check-in before arrival date ({0}) is not allowed by Hotel Settings.").format(res.check_in_date))
 
     room_doc = frappe.get_doc("Hotel Room", res.room)
-    if room_doc.status != RoomStatus.AVAILABLE:
-        frappe.throw(_("Room {0} is not ready: {1}").format(res.room, room_doc.status))
+    if room_doc.status not in (RoomStatus.AVAILABLE, RoomStatus.RESERVED):
+        frappe.throw(_("Room {0} is not ready for check-in: {1}").format(res.room, room_doc.status))
+
+    if room_doc.status == RoomStatus.RESERVED and room_doc.current_reservation and room_doc.current_reservation != res.name:
+        frappe.throw(_("Room {0} is reserved by another reservation ({1}).").format(res.room, room_doc.current_reservation))
 
     if res.stays:
         res.stays[0].from_date = today
+        if getdate(res.stays[0].to_date) <= today:
+            res.stays[0].to_date = frappe.utils.add_days(today, 1)
+        res.stays[0].nights = max(date_diff(res.stays[0].to_date, res.stays[0].from_date), 1)
+        res.check_out_date = res.stays[-1].to_date
 
     res.status = ReservationStatus.CHECKED_IN
     res.checked_in_on = now_datetime()

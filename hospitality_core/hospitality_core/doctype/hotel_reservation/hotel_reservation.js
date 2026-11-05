@@ -30,6 +30,18 @@ frappe.ui.form.on("Hotel Reservation", {
         }
     },
 
+    room(frm) {
+        if (frm.doc.stays && frm.doc.stays.length === 1) {
+            frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "room", frm.doc.room);
+            frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "room_type", frm.doc.room_type);
+            frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "from_date", frm.doc.check_in_date);
+            frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "to_date", frm.doc.check_out_date);
+            let diff = frappe.datetime.get_diff(frm.doc.check_out_date, frm.doc.check_in_date) || 1;
+            frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "nights", diff);
+            frm.refresh_field("stays");
+        }
+    },
+
     check_in_date(frm) {
         if (frm.doc.room_type && frm.doc.check_in_date && frm.doc.check_out_date) {
             frm.trigger("update_rate_and_stays");
@@ -53,6 +65,7 @@ frappe.ui.form.on("Hotel Reservation", {
             },
             callback: (r) => {
                 const rate = r.message || 0;
+                let diff = frappe.datetime.get_diff(frm.doc.check_out_date, frm.doc.check_in_date) || 1;
                 if (!frm.doc.stays || frm.doc.stays.length === 0) {
                     frm.clear_table("stays");
                     const row = frm.add_child("stays");
@@ -61,7 +74,15 @@ frappe.ui.form.on("Hotel Reservation", {
                     row.from_date = frm.doc.check_in_date;
                     row.to_date = frm.doc.check_out_date;
                     row.rate = rate;
-                    row.nights = frappe.datetime.get_diff(frm.doc.check_out_date, frm.doc.check_in_date) || 1;
+                    row.nights = diff;
+                    frm.refresh_field("stays");
+                } else if (frm.doc.stays.length === 1) {
+                    frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "room", frm.doc.room);
+                    frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "room_type", frm.doc.room_type);
+                    frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "from_date", frm.doc.check_in_date);
+                    frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "to_date", frm.doc.check_out_date);
+                    frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "rate", rate);
+                    frappe.model.set_value(frm.doc.stays[0].doctype, frm.doc.stays[0].name, "nights", diff);
                     frm.refresh_field("stays");
                 }
             }

@@ -46,7 +46,7 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Available\nOccupied\nDirty\nOut of Order",
+   "options": "Available\nReserved\nOccupied\nDirty\nOut of Order",
    "reqd": 1
   },
   {

@@ -13,10 +13,11 @@ def set_room_status(room_number, new_status, reason=None, reservation=None):
 
     room = frappe.get_doc("Hotel Room", room_number)
 
-    # If transitioning to Occupied, reservation should usually be provided or kept
-    if new_status == RoomStatus.OCCUPIED and reservation:
-        room.current_reservation = reservation
-    elif new_status != RoomStatus.OCCUPIED and not reservation:
+    # If transitioning to Occupied or Reserved, reservation should usually be provided or kept
+    if new_status in (RoomStatus.OCCUPIED, RoomStatus.RESERVED):
+        if reservation:
+            room.current_reservation = reservation
+    elif not reservation:
         room.current_reservation = None
 
     old_status = room.status
