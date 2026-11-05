@@ -26,5 +26,9 @@ after_install = "hospitality_core.setup.install.after_install"
 doc_events = {
     "Issue": {
         "on_update": "hospitality_core.maintenance.on_issue_update"
+    },
+    "Sales Invoice": {
+        "validate": "hospitality_core.pos.validate_sales_invoice",
+        "before_submit": "hospitality_core.pos.before_submit_sales_invoice"
     }
 }

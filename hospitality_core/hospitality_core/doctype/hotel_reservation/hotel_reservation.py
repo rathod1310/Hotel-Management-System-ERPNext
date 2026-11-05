@@ -322,6 +322,15 @@ def cancel_reservation(reservation_name):
     if res.status != ReservationStatus.RESERVED:
         frappe.throw(_("Only Reserved stays can be cancelled."))
 
+    # Clean up any flagged room drafts if confirmed
+    flagged_drafts = frappe.get_all(
+        "Sales Invoice",
+        filters={"hotel_reservation": res.name, "charge_to_room": 1, "docstatus": 0},
+        pluck="name"
+    )
+    for dname in flagged_drafts:
+        frappe.delete_doc("Sales Invoice", dname, ignore_permissions=True, force=True)
+
     res.status = ReservationStatus.CANCELLED
     res.save()
 
@@ -358,6 +367,7 @@ def build_sales_invoice(reservation_name, as_of=None):
         inv.cost_center = settings.cost_center
 
     inv.allocate_advances_automatically = 1
+    inv.hotel_order_type = "Stay Checkout"
 
     total_nights_stayed = 0
     lines_added = 0
@@ -402,6 +412,48 @@ def build_sales_invoice(reservation_name, as_of=None):
                 "description": _("Room {0} ({1}) [Minimum Stay]").format(first_row.room, first_row.room_type)
             })
 
+    # Append lines from unpaid flagged Charge to Room POS drafts
+    flagged_drafts = frappe.get_all(
+        "Sales Invoice",
+        filters={
+            "hotel_reservation": res.name,
+            "charge_to_room": 1,
+            "docstatus": 0
+        },
+        fields=["name", "additional_discount_percentage", "discount_amount", "net_total", "grand_total"],
+        order_by="creation asc"
+    )
+
+    update_stock = int(settings.update_stock_on_checkout or 0)
+    inv.update_stock = update_stock
+
+    for draft in flagged_drafts:
+        draft_items = frappe.get_all(
+            "Sales Invoice Item",
+            filters={"parent": draft.name},
+            fields=[
+                "item_code", "item_name", "description", "qty", "uom",
+                "rate", "discount_percentage", "discount_amount", "cost_center"
+            ]
+        )
+        for item in draft_items:
+            # If draft had document-level discount percentage, ensure it applies
+            item_discount = flt(item.discount_percentage)
+            if not item_discount and draft.additional_discount_percentage:
+                item_discount = flt(draft.additional_discount_percentage)
+
+            inv.append("items", {
+                "item_code": item.item_code,
+                "item_name": item.item_name,
+                "description": item.description or item.item_name,
+                "qty": item.qty,
+                "uom": item.uom,
+                "rate": item.rate,
+                "discount_percentage": item_discount,
+                "cost_center": item.cost_center or settings.cost_center,
+                "hotel_source_invoice": draft.name
+            })
+
     inv.set_missing_values()
     inv.calculate_taxes_and_totals()
     return inv
@@ -410,7 +462,7 @@ def build_sales_invoice(reservation_name, as_of=None):
 @frappe.whitelist()
 def get_billing_summary(reservation_name):
     """
-    Computes estimated_total, total_paid, and balance for a reservation.
+    Computes estimated_total, total_paid, balance, room_service_pending, and room_service_paid.
     """
     res = frappe.get_doc("Hotel Reservation", reservation_name)
 
@@ -444,6 +496,22 @@ def get_billing_summary(reservation_name):
 
     balance = flt(estimated_total - total_paid, 2)
 
+    # 3. Room Service Drafts and Paid metrics
+    pending_room_orders = frappe.db.sql("""
+        SELECT SUM(grand_total) FROM `tabSales Invoice`
+        WHERE hotel_reservation = %s
+        AND charge_to_room = 1
+        AND docstatus = 0
+    """, reservation_name)[0][0] or 0.0
+
+    paid_room_orders = frappe.db.sql("""
+        SELECT SUM(grand_total) FROM `tabSales Invoice`
+        WHERE hotel_reservation = %s
+        AND hotel_order_type = 'Room Service'
+        AND docstatus = 1
+        AND name != %s
+    """, (reservation_name, res.sales_invoice or "None"))[0][0] or 0.0
+
     # Update on doc if changed
     if res.estimated_total != estimated_total or res.total_paid != total_paid or res.balance != balance:
         frappe.db.set_value("Hotel Reservation", res.name, {
@@ -456,15 +524,20 @@ def get_billing_summary(reservation_name):
         "estimated_total": estimated_total,
         "total_paid": total_paid,
         "balance": balance,
-        "sales_invoice": res.sales_invoice
+        "sales_invoice": res.sales_invoice,
+        "room_service_pending": flt(pending_room_orders, 2),
+        "room_service_paid": flt(paid_room_orders, 2)
     }
 
 
 @frappe.whitelist()
 def check_out(reservation_name):
-    res = frappe.get_doc("Hotel Reservation", reservation_name)
-    if res.status != ReservationStatus.CHECKED_IN:
+    # Lock reservation row during checkout
+    res_status = frappe.db.get_value("Hotel Reservation", reservation_name, "status", for_update=True)
+    if res_status != ReservationStatus.CHECKED_IN:
         frappe.throw(_("Only Checked In reservations can be checked out."))
+
+    res = frappe.get_doc("Hotel Reservation", reservation_name)
 
     today = getdate()
     settings = get_settings()
@@ -483,10 +556,27 @@ def check_out(reservation_name):
             billing["balance"]
         ))
 
+    # Fetch flagged drafts before building invoice
+    flagged_draft_names = frappe.get_all(
+        "Sales Invoice",
+        filters={
+            "hotel_reservation": res.name,
+            "charge_to_room": 1,
+            "docstatus": 0
+        },
+        pluck="name"
+    )
+
     # Build and submit Sales Invoice
     inv = build_sales_invoice(reservation_name, as_of=today)
     inv.insert(ignore_permissions=True)
     inv.submit()
+
+    # Delete merged drafts and add audit comment
+    if flagged_draft_names:
+        for dname in flagged_draft_names:
+            frappe.delete_doc("Sales Invoice", dname, ignore_permissions=True, force=True)
+        inv.add_comment("Comment", _("Merged room orders: {0}").format(", ".join(flagged_draft_names)))
 
     res.sales_invoice = inv.name
     res.status = ReservationStatus.CHECKED_OUT

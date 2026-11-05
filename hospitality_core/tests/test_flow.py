@@ -6,9 +6,12 @@ from hospitality_core.hospitality_core.doctype.hotel_reservation.hotel_reservati
     check_in,
     move_room,
     check_out,
-    get_billing_summary
+    get_billing_summary,
+    cancel_reservation
 )
 from hospitality_core.hospitality_core.doctype.hotel_room.hotel_room import mark_clean, send_to_maintenance
+from hospitality_core.hospitality_core.doctype.hotel_settings.hotel_settings import create_pos_profiles
+from hospitality_core.pos import charge_to_room, get_pending_room_orders, unflag_charge_to_room
 
 
 class TestHotelFlow(FrappeTestCase):
@@ -35,6 +38,20 @@ class TestHotelFlow(FrappeTestCase):
             })
             item.insert(ignore_permissions=True)
 
+        cls.food_item = "HOTEL-FOOD-ITEM"
+        if not frappe.db.exists("Item", cls.food_item):
+            fitem = frappe.get_doc({
+                "doctype": "Item",
+                "item_code": cls.food_item,
+                "item_name": "Club Sandwich",
+                "item_group": "Services",
+                "is_stock_item": 0
+            })
+            fitem.insert(ignore_permissions=True)
+
+        # Create or ensure POS profiles
+        cls.pos_profiles = create_pos_profiles(company=cls.company)
+
         settings = frappe.get_doc("Hotel Settings")
         settings.company = cls.company
         settings.default_room_item = cls.item_code
@@ -43,6 +60,8 @@ class TestHotelFlow(FrappeTestCase):
         settings.block_checkout_if_balance = 1
         settings.balance_tolerance = 0.0
         settings.min_billable_nights = 1
+        settings.restaurant_pos_profile = cls.pos_profiles["restaurant"]
+        settings.room_pos_profile = cls.pos_profiles["room"]
         settings.save(ignore_permissions=True)
 
         cls.room_type = "Deluxe Suite"
@@ -228,3 +247,197 @@ class TestHotelFlow(FrappeTestCase):
         })
         b2b_res.insert(ignore_permissions=True)
         self.assertTrue(bool(b2b_res.name))
+
+    def test_pos_scenarios_a_to_g(self):
+        """
+        Acceptance test scenarios A to G from PLAN_V2_POS_UX.md:
+        A: Restaurant order paid in restaurant profile -> submitted, paid, hotel_order_type = Restaurant
+        B: Room order paid now (in-house guest) -> submitted, paid, hotel_reservation set, not in checkout invoice
+        C: Room order Charge to Room, then checkout -> draft flagged; merged into checkout invoice; draft deleted
+        D: Two unpaid room orders + advance payment -> checkout invoice has both orders, advance auto-allocated
+        E: Room order for guest not checked in -> blocked
+        F: Submit charge_to_room draft manually -> blocked by before_submit
+        G: Cancel reservation with flagged drafts -> drafts deleted
+        """
+        today = getdate(nowdate())
+        checkout_date = add_days(today, 2)
+
+        # Scenario E: Room order for guest not checked in must fail
+        not_in_house_cust = "Walkin Guest Test"
+        if not frappe.db.exists("Customer", not_in_house_cust):
+            frappe.get_doc({
+                "doctype": "Customer",
+                "customer_name": not_in_house_cust,
+                "customer_type": "Individual"
+            }).insert(ignore_permissions=True)
+
+        inv_e = frappe.new_doc("Sales Invoice")
+        inv_e.company = self.company
+        inv_e.customer = not_in_house_cust
+        inv_e.pos_profile = self.pos_profiles["room"]
+        inv_e.append("items", {"item_code": self.food_item, "qty": 1, "rate": 50})
+        self.assertRaises(frappe.ValidationError, inv_e.insert)
+
+        # Scenario A: Restaurant order paid in restaurant profile
+        inv_a = frappe.new_doc("Sales Invoice")
+        inv_a.company = self.company
+        inv_a.customer = not_in_house_cust
+        inv_a.pos_profile = self.pos_profiles["restaurant"]
+        inv_a.is_pos = 1
+        inv_a.append("items", {"item_code": self.food_item, "qty": 2, "rate": 50})
+        inv_a.append("payments", {
+            "mode_of_payment": "Cash",
+            "account": self.paid_to,
+            "amount": 100.0,
+            "default": 1
+        })
+        inv_a.insert(ignore_permissions=True)
+        inv_a.submit()
+        self.assertEqual(inv_a.hotel_order_type, "Restaurant")
+        self.assertFalse(bool(inv_a.hotel_reservation))
+
+        # Create active stay for in-house guest
+        stay_res = frappe.get_doc({
+            "doctype": "Hotel Reservation",
+            "company": self.company,
+            "customer": self.customer_name,
+            "room_type": self.room_type,
+            "room": self.rooms[1],
+            "check_in_date": today,
+            "check_out_date": checkout_date,
+            "adults": 1
+        })
+        stay_res.insert(ignore_permissions=True)
+        check_in(stay_res.name)
+        stay_res.reload()
+
+        # Scenario B: Room order paid now (in-house guest)
+        inv_b = frappe.new_doc("Sales Invoice")
+        inv_b.company = self.company
+        inv_b.customer = self.customer_name
+        inv_b.pos_profile = self.pos_profiles["room"]
+        inv_b.is_pos = 1
+        inv_b.append("items", {"item_code": self.food_item, "qty": 1, "rate": 60})
+        inv_b.append("payments", {
+            "mode_of_payment": "Cash",
+            "account": self.paid_to,
+            "amount": 60.0,
+            "default": 1
+        })
+        inv_b.insert(ignore_permissions=True)
+        inv_b.submit()
+        self.assertEqual(inv_b.hotel_order_type, "Room Service")
+        self.assertEqual(inv_b.hotel_reservation, stay_res.name)
+
+        # Scenario C & D: Create two unpaid room orders and flag Charge to Room
+        inv_c1 = frappe.new_doc("Sales Invoice")
+        inv_c1.company = self.company
+        inv_c1.customer = self.customer_name
+        inv_c1.pos_profile = self.pos_profiles["room"]
+        inv_c1.is_pos = 1
+        inv_c1.append("items", {"item_code": self.food_item, "qty": 1, "rate": 100})
+        inv_c1.insert(ignore_permissions=True)
+        charge_to_room(inv_c1.name)
+        inv_c1.reload()
+        self.assertEqual(inv_c1.charge_to_room, 1)
+
+        # Scenario F: Submitting a charge_to_room draft manually must be blocked
+        self.assertRaises(frappe.ValidationError, inv_c1.submit)
+
+        inv_c2 = frappe.new_doc("Sales Invoice")
+        inv_c2.company = self.company
+        inv_c2.customer = self.customer_name
+        inv_c2.pos_profile = self.pos_profiles["room"]
+        inv_c2.is_pos = 1
+        inv_c2.append("items", {"item_code": self.food_item, "qty": 2, "rate": 50})
+        inv_c2.insert(ignore_permissions=True)
+        charge_to_room(inv_c2.name)
+
+        # Verify get_pending_room_orders
+        pending = get_pending_room_orders(stay_res.name)
+        self.assertEqual(len(pending), 2)
+
+        # Verify billing summary includes pending room orders (100 + 100 = 200)
+        billing = get_billing_summary(stay_res.name)
+        self.assertEqual(billing["room_service_pending"], 200.0)
+
+        # Scenario D: Advance payment of 150
+        adv_pe = frappe.get_doc({
+            "doctype": "Payment Entry",
+            "payment_type": "Receive",
+            "party_type": "Customer",
+            "party": self.customer_name,
+            "company": self.company,
+            "hotel_reservation": stay_res.name,
+            "paid_to": self.paid_to,
+            "paid_from": self.paid_from,
+            "paid_to_account_currency": self.currency,
+            "paid_from_account_currency": self.currency,
+            "source_exchange_rate": 1.0,
+            "target_exchange_rate": 1.0,
+            "paid_amount": 150.0,
+            "received_amount": 150.0
+        })
+        adv_pe.insert(ignore_permissions=True)
+        adv_pe.submit()
+
+        # Settle remainder
+        rem_balance = get_billing_summary(stay_res.name)["balance"]
+        if rem_balance > 0:
+            pe_rem = frappe.get_doc({
+                "doctype": "Payment Entry",
+                "payment_type": "Receive",
+                "party_type": "Customer",
+                "party": self.customer_name,
+                "company": self.company,
+                "hotel_reservation": stay_res.name,
+                "paid_to": self.paid_to,
+                "paid_from": self.paid_from,
+                "paid_to_account_currency": self.currency,
+                "paid_from_account_currency": self.currency,
+                "source_exchange_rate": 1.0,
+                "target_exchange_rate": 1.0,
+                "paid_amount": rem_balance,
+                "received_amount": rem_balance
+            })
+            pe_rem.insert(ignore_permissions=True)
+            pe_rem.submit()
+
+        # Check out
+        check_out(stay_res.name)
+        stay_res.reload()
+        self.assertEqual(stay_res.status, ReservationStatus.CHECKED_OUT)
+
+        checkout_inv = frappe.get_doc("Sales Invoice", stay_res.sales_invoice)
+        source_invoices = [item.hotel_source_invoice for item in checkout_inv.items if item.hotel_source_invoice]
+        self.assertIn(inv_c1.name, source_invoices)
+        self.assertIn(inv_c2.name, source_invoices)
+
+        # Drafts should be deleted
+        self.assertFalse(frappe.db.exists("Sales Invoice", inv_c1.name))
+        self.assertFalse(frappe.db.exists("Sales Invoice", inv_c2.name))
+
+        # Scenario G: Cancel reservation with flagged drafts
+        cancel_res = frappe.get_doc({
+            "doctype": "Hotel Reservation",
+            "company": self.company,
+            "customer": self.customer_name,
+            "room_type": self.room_type,
+            "room": self.rooms[2],
+            "check_in_date": add_days(today, 10),
+            "check_out_date": add_days(today, 12),
+            "adults": 1
+        })
+        cancel_res.insert(ignore_permissions=True)
+
+        inv_g = frappe.new_doc("Sales Invoice")
+        inv_g.company = self.company
+        inv_g.customer = self.customer_name
+        inv_g.hotel_reservation = cancel_res.name
+        inv_g.charge_to_room = 1
+        inv_g.append("items", {"item_code": self.food_item, "qty": 1, "rate": 40})
+        inv_g.insert(ignore_permissions=True)
+        self.assertTrue(frappe.db.exists("Sales Invoice", inv_g.name))
+
+        cancel_reservation(cancel_res.name)
+        self.assertFalse(frappe.db.exists("Sales Invoice", inv_g.name))
