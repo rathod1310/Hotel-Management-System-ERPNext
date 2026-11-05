@@ -15,7 +15,14 @@
   "allow_checkin_before_arrival",
   "block_checkout_if_balance",
   "balance_tolerance",
-  "min_billable_nights"
+  "min_billable_nights",
+  "section_pos",
+  "restaurant_pos_profile",
+  "room_pos_profile",
+  "column_break_pos",
+  "default_advance_mode",
+  "update_stock_on_checkout",
+  "console_refresh_seconds"
  ],
  "fields": [
   {
@@ -88,11 +95,50 @@
    "fieldname": "min_billable_nights",
    "fieldtype": "Int",
    "label": "Minimum Billable Nights"
+  },
+  {
+   "fieldname": "section_pos",
+   "fieldtype": "Section Break",
+   "label": "POS & Console Configuration"
+  },
+  {
+   "fieldname": "restaurant_pos_profile",
+   "fieldtype": "Link",
+   "label": "Restaurant POS Profile",
+   "options": "POS Profile"
+  },
+  {
+   "fieldname": "room_pos_profile",
+   "fieldtype": "Link",
+   "label": "Room POS Profile",
+   "options": "POS Profile"
+  },
+  {
+   "fieldname": "column_break_pos",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_advance_mode",
+   "fieldtype": "Link",
+   "label": "Default Advance Mode of Payment",
+   "options": "Mode of Payment"
+  },
+  {
+   "default": "0",
+   "fieldname": "update_stock_on_checkout",
+   "fieldtype": "Check",
+   "label": "Update Stock on Checkout"
+  },
+  {
+   "default": "60",
+   "fieldname": "console_refresh_seconds",
+   "fieldtype": "Int",
+   "label": "Console Refresh Interval (Seconds)"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2026-11-05 00:00:00.000000",
+ "modified": "2026-11-05 05:00:00.000000",
  "modified_by": "Administrator",
  "module": "Hospitality Core",
  "name": "Hotel Settings",
@@ -107,20 +153,9 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
-  },
-  {
-   "read": 1,
-   "role": "Hospitality Manager",
-   "write": 1
-  },
-  {
-   "read": 1,
-   "role": "Hospitality User"
   }
  ],
- "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": []
 }
-

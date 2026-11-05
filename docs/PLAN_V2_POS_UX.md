@@ -370,3 +370,4 @@ grep -rniE "Edo Heritage|ROOM-RENT|Main Reception|\"Restaurant\"|\"Room Service\
 - If section 2 facts differ in the local ERPNext source.
 - GST: which tax template and Item Tax Templates to use for room vs food items.
 - Whether restaurant orders should ever be chargeable to a room.
+

@@ -45,6 +45,31 @@ def get_custom_fields():
                 "options": "Hotel Reservation",
                 "read_only": 1,
                 "insert_after": "customer"
+            },
+            {
+                "fieldname": "hotel_order_type",
+                "label": "Hotel Order Type",
+                "fieldtype": "Select",
+                "options": "\nRestaurant\nRoom Service\nStay Checkout",
+                "read_only": 1,
+                "insert_after": "hotel_reservation"
+            },
+            {
+                "fieldname": "charge_to_room",
+                "label": "Charge to Room",
+                "fieldtype": "Check",
+                "default": "0",
+                "read_only": 1,
+                "insert_after": "hotel_order_type"
+            }
+        ],
+        "Sales Invoice Item": [
+            {
+                "fieldname": "hotel_source_invoice",
+                "label": "Hotel Source Invoice",
+                "fieldtype": "Data",
+                "read_only": 1,
+                "insert_after": "item_code"
             }
         ],
         "Issue": [
@@ -69,4 +94,3 @@ def get_custom_fields():
 def setup_custom_fields():
     custom_fields = get_custom_fields()
     create_custom_fields(custom_fields, ignore_validate=True)
-
