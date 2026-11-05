@@ -1,0 +1,242 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2025-01-28 10:50:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "company",
+  "customer",
+  "room_type",
+  "room",
+  "rate_plan",
+  "column_break_main",
+  "status",
+  "check_in_date",
+  "check_out_date",
+  "adults",
+  "children",
+  "section_break_stays",
+  "stays",
+  "section_break_billing",
+  "estimated_total",
+  "total_paid",
+  "balance",
+  "sales_invoice",
+  "column_break_timestamps",
+  "checked_in_on",
+  "checked_out_on",
+  "section_break_remarks",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "default": "HR-.YYYY.-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "no_copy": 1,
+   "options": "HR-.YYYY.-",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Guest (Customer)",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "room_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Room Type",
+   "options": "Hotel Room Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "room",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Room",
+   "options": "Hotel Room",
+   "reqd": 1
+  },
+  {
+   "fieldname": "rate_plan",
+   "fieldtype": "Link",
+   "label": "Rate Plan",
+   "options": "Room Rate Plan"
+  },
+  {
+   "fieldname": "column_break_main",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Reserved",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Reserved\nChecked In\nChecked Out\nCancelled",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "check_in_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Check In Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "check_out_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Check Out Date",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "adults",
+   "fieldtype": "Int",
+   "label": "Adults",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "children",
+   "fieldtype": "Int",
+   "label": "Children"
+  },
+  {
+   "fieldname": "section_break_stays",
+   "fieldtype": "Section Break",
+   "label": "Stay Segments"
+  },
+  {
+   "fieldname": "stays",
+   "fieldtype": "Table",
+   "label": "Stays",
+   "options": "Hotel Reservation Stay"
+  },
+  {
+   "fieldname": "section_break_billing",
+   "fieldtype": "Section Break",
+   "label": "Billing Summary"
+  },
+  {
+   "default": "0",
+   "fieldname": "estimated_total",
+   "fieldtype": "Currency",
+   "label": "Estimated Total",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "total_paid",
+   "fieldtype": "Currency",
+   "label": "Total Paid",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "balance",
+   "fieldtype": "Currency",
+   "label": "Balance",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_timestamps",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "checked_in_on",
+   "fieldtype": "Datetime",
+   "label": "Checked In On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "checked_out_on",
+   "fieldtype": "Datetime",
+   "label": "Checked Out On",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_remarks",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  }
+ ],
+ "links": [],
+ "modified": "2026-11-05 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospitality Core",
+ "name": "Hotel Reservation",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Hospitality Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Hospitality User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

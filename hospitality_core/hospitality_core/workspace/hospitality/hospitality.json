@@ -1,0 +1,229 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"FD_HDR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Front Desk &amp; Quick Actions</span>\",\"col\":12}},{\"id\":\"AFikpVG8G_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Front Desk Console\",\"col\":4}},{\"id\":\"LmjeZv2AcL\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tape Chart\",\"col\":4}},{\"id\":\"is7sVl6bVG\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Availability Tool\",\"col\":4}},{\"id\":\"res_short\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hotel Reservation\",\"col\":4}},{\"id\":\"room_short\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hotel Room\",\"col\":4}},{\"id\":\"settings_short\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hotel Settings\",\"col\":4}},{\"id\":\"frontdesk_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Front Desk Operations\",\"col\":4}},{\"id\":\"reports_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"billing_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Billing & Maintenance\",\"col\":4}}]",
+ "creation": "2026-01-17 20:44:38.076236",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "hide_custom": 0,
+ "icon": "hotel",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Hotel",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Front Desk Operations",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Hotel Reservation",
+   "link_count": 0,
+   "link_to": "Hotel Reservation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Hotel Room",
+   "link_count": 0,
+   "link_to": "Hotel Room",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Hotel Room Type",
+   "link_count": 0,
+   "link_to": "Hotel Room Type",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Room Rate Plan",
+   "link_count": 0,
+   "link_to": "Room Rate Plan",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Hotel Settings",
+   "link_count": 0,
+   "link_to": "Hotel Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Billing & Maintenance",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer",
+   "link_count": 0,
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Issue",
+   "link_count": 0,
+   "link_to": "Issue",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Entry",
+   "link_count": 0,
+   "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Invoice",
+   "link_count": 0,
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Reports",
+   "link_count": 0,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "House List",
+   "link_count": 0,
+   "link_to": "House List",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daily Arrivals",
+   "link_count": 0,
+   "link_to": "Daily Arrivals",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daily Departures",
+   "link_count": 0,
+   "link_to": "Daily Departures",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Room Availability Report",
+   "link_count": 0,
+   "link_to": "Room Availability Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-11-05 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospitality Core",
+ "name": "Hotel",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Front Desk Console",
+   "link_to": "front-desk-console",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Tape Chart",
+   "link_to": "tape-chart",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Availability Tool",
+   "link_to": "availability-tool",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Hotel Reservation",
+   "link_to": "Hotel Reservation",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Hotel Room",
+   "link_to": "Hotel Room",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Hotel Settings",
+   "link_to": "Hotel Settings",
+   "type": "DocType"
+  }
+ ],
+ "title": "Hotel"
+}

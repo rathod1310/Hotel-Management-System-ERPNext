@@ -1,0 +1,17 @@
+[core]
+	repositoryformatversion = 0
+	filemode = true
+	bare = false
+	logallrefupdates = true
+[branch "main"]
+	vscode-merge-base = upstream/main
+[branch "pre-refactor"]
+	vscode-merge-base = upstream/main
+[user]
+	email = frappe@localhost
+	name = Frappe
+[branch "main"]
+	vscode-merge-base = upstream/main
+[remote "origin"]
+	url = https://github.com/rathod1310/Hotel-Management-System-ERPNext.git
+	fetch = +refs/heads/*:refs/remotes/origin/*

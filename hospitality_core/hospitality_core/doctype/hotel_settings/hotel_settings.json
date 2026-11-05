@@ -1,0 +1,126 @@
+{
+ "actions": [],
+ "creation": "2026-11-05 00:00:00.000000",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "default_room_item",
+  "guest_customer_group",
+  "guest_territory",
+  "sales_taxes_template",
+  "cost_center",
+  "column_break_settings",
+  "status_after_maintenance",
+  "allow_checkin_before_arrival",
+  "block_checkout_if_balance",
+  "balance_tolerance",
+  "min_billable_nights"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "default_room_item",
+   "fieldtype": "Link",
+   "label": "Default Room Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "guest_customer_group",
+   "fieldtype": "Link",
+   "label": "Guest Customer Group",
+   "options": "Customer Group"
+  },
+  {
+   "fieldname": "guest_territory",
+   "fieldtype": "Link",
+   "label": "Guest Territory",
+   "options": "Territory"
+  },
+  {
+   "fieldname": "sales_taxes_template",
+   "fieldtype": "Link",
+   "label": "Sales Taxes and Charges Template",
+   "options": "Sales Taxes and Charges Template"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "column_break_settings",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Available",
+   "fieldname": "status_after_maintenance",
+   "fieldtype": "Select",
+   "label": "Status After Maintenance",
+   "options": "Available\nDirty"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_checkin_before_arrival",
+   "fieldtype": "Check",
+   "label": "Allow Check-in Before Arrival Date"
+  },
+  {
+   "default": "1",
+   "fieldname": "block_checkout_if_balance",
+   "fieldtype": "Check",
+   "label": "Block Check-out if Balance Remaining"
+  },
+  {
+   "default": "0",
+   "fieldname": "balance_tolerance",
+   "fieldtype": "Currency",
+   "label": "Balance Tolerance"
+  },
+  {
+   "default": "1",
+   "fieldname": "min_billable_nights",
+   "fieldtype": "Int",
+   "label": "Minimum Billable Nights"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-11-05 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospitality Core",
+ "name": "Hotel Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Hospitality Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Hospitality User"
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
+

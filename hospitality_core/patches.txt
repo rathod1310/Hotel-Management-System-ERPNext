@@ -1,0 +1,5 @@
+[pre_model_sync]
+
+[post_model_sync]
+hospitality_core.patches.v2_0.create_custom_fields
+hospitality_core.patches.v2_0.remove_legacy
