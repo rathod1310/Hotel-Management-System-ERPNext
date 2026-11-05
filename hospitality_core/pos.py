@@ -173,3 +173,4 @@ def get_pending_room_orders(reservation):
         result.append(d)
 
     return result
+

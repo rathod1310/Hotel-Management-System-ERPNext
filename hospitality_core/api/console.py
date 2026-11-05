@@ -532,3 +532,4 @@ def ensure_pos_opening(pos_profile):
     opening_doc.submit()
 
     return {"name": opening_doc.name, "status": "Created"}
+

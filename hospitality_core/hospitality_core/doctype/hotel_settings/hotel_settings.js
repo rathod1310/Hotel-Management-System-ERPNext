@@ -24,3 +24,4 @@ frappe.ui.form.on("Hotel Settings", {
         }, __("Actions"));
     }
 });
+

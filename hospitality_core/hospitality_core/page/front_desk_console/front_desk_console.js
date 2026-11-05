@@ -3,7 +3,8 @@
  * Single-screen, zero-redirect console with Dialogs and embedded POS overlay.
  */
 
-frappe.pages['front_desk_console'].on_page_load = function (wrapper) {
+frappe.pages['front-desk-console'] = frappe.pages['front-desk-console'] || {};
+frappe.pages['front-desk-console'].on_page_load = function (wrapper) {
     var page = frappe.ui.make_app_page({
         parent: wrapper,
         title: __('Front Desk Console'),
@@ -12,6 +13,7 @@ frappe.pages['front_desk_console'].on_page_load = function (wrapper) {
 
     window.cur_fd_console = new FrontDeskConsole(wrapper, page);
 };
+frappe.pages['front_desk_console'] = frappe.pages['front-desk-console'];
 
 class FrontDeskConsole {
     constructor(wrapper, page) {

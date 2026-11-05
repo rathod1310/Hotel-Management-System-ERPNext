@@ -73,3 +73,4 @@ Verified against ERPNext v17 develop source tree at `/home/frappe/frappe-bench/a
 - **File**: `/home/frappe/frappe-bench/apps/erpnext/erpnext/accounts/doctype/pos_closing_entry/pos_closing_entry.py:498`
 - **Confirmation**: Queries explicitly filter `(InvoiceDocType.docstatus == 1)`, completely ignoring drafts (`docstatus = 0`).
 - **Status**: **CONFIRMED**
+
