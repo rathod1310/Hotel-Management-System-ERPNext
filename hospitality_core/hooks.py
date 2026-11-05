@@ -32,3 +32,8 @@ doc_events = {
         "before_submit": "hospitality_core.pos.before_submit_sales_invoice"
     }
 }
+
+# Standard Page Extensions
+page_js = {
+    "point-of-sale": "public/js/pos_extension.js"
+}
