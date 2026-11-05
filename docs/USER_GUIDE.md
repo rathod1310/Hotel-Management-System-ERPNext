@@ -43,7 +43,7 @@ Navigate to **Hotel** $\rightarrow$ **Hotel Settings**:
 ### Step 2: Hotel Room Types
 Navigate to **Hotel** $\rightarrow$ **Hotel Room Type** $\rightarrow$ **+ Add Hotel Room Type**:
 - **Room Type Name**: e.g., *Deluxe King*, *Standard Twin*, *Executive Suite*.
-- **Default Rate**: The baseline night charge (e.g., $150.00).
+- **Default Rate**: The baseline night charge (e.g., \$150.00).
 - **Max Adults / Max Children**: Occupancy limits.
 - **Item**: Linked standard ERPNext item for room billing.
 
@@ -54,6 +54,14 @@ Navigate to **Hotel** $\rightarrow$ **Hotel Room** $\rightarrow$ **+ Add Hotel R
 - **Floor**: Floor number (e.g., `1`, `2`, `3`).
 - **Status**: Start with `Available`.
 - **Is Enabled**: Checked.
+
+> [!TIP]
+> You can quickly create multiple rooms using the ERPNext Data Import tool or Frappe bench scripts if setting up a large property.
+
+### Step 4: Room Rate Plans (Optional)
+Navigate to **Hotel** $\rightarrow$ **Room Rate Plan** to set special pricing:
+- Corporate discounts linked to specific Customer Groups or corporate accounts.
+- Seasonal rates with explicit **Valid From** and **Valid To** date ranges.
 
 ---
 
@@ -68,6 +76,9 @@ Navigate to **Hotel** $\rightarrow$ **Hotel Room** $\rightarrow$ **+ Add Hotel R
    - **Room Type**: Select desired room tier.
 4. Click **Fetch Available Rooms** to see available rooms for those dates. Select a specific room or leave blank to assign at check-in.
 5. Save and Submit the reservation (Status becomes `Reserved`).
+
+> [!NOTE]
+> The reservation automatically computes the total rate based on your rate plans and sets up the primary segment in the **Stays** table.
 
 ---
 
@@ -129,10 +140,19 @@ Navigate to **Hotel** $\rightarrow$ **Housekeeping View** or URL `/app/housekeep
 
 | Border Color | Room Status | Meaning | Action Button |
 | :---: | :---: | :--- | :---: |
-| **Green** | `Available` | Clean, inspected, and ready for check-in | **Mark Dirty** |
-| **Yellow** | `Dirty` | Vacated or needs cleaning | **Mark Clean** |
+| **Green** | `Available` | Clean, inspected, and ready for booking/check-in | **Mark Dirty** |
+| **Cyan / Blue** | `Reserved` | Reserved for an incoming guest (locked against other bookings) | *(Reserved)* |
+| **Yellow** | `Dirty` | Vacated or needs cleaning (cannot be booked) | **Mark Clean** |
 | **Dark Gray** | `Occupied` | Guest currently staying in room | **Mark Dirty** |
 | **Red** | `Out of Order`| Under maintenance or repair | *(Disabled)* |
+
+```
+┌─────────────────────────────────┐
+│              101                │
+│            Available            │
+│       [ Mark Dirty (Yellow) ]   │
+└─────────────────────────────────┘
+```
 
 ### Housekeeping Workflow
 1. When a guest checks out, the room automatically turns **Yellow (`Dirty`)**.
@@ -187,7 +207,7 @@ A room will not be listed if:
 4. Another guest has a confirmed future reservation overlapping those dates.
 
 ### Q: Can we check out a guest if they still owe money?
-If **Block Checkout if Balance** is checked in *Hotel Settings*, the system prevents check-out until the balance is $0.00. To override for corporate accounts with credit terms, you can disable this option in *Hotel Settings*.
+If **Block Checkout if Balance** is checked in *Hotel Settings*, the system prevents check-out until the balance is \$0.00. To override for corporate accounts with credit terms, you can disable this option in *Hotel Settings*.
 
 ### Q: How do room charges get posted to the General Ledger?
 Upon check-out, the system creates a standard ERPNext **Sales Invoice** debiting Accounts Receivable (or Cash/Bank) and crediting your Hotel Accommodation Income Account. All transactions flow naturally into standard Profit & Loss and Balance Sheet reports.
