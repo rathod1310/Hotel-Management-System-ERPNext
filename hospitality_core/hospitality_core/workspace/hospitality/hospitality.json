@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"FD_HDR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Front Desk &amp; Quick Actions</span>\",\"col\":12}},{\"id\":\"AFikpVG8G_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Front Desk Console\",\"col\":4}},{\"id\":\"LmjeZv2AcL\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tape Chart\",\"col\":4}},{\"id\":\"is7sVl6bVG\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Availability Tool\",\"col\":4}},{\"id\":\"res_short\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hotel Reservation\",\"col\":4}},{\"id\":\"room_short\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hotel Room\",\"col\":4}},{\"id\":\"settings_short\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hotel Settings\",\"col\":4}},{\"id\":\"frontdesk_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Front Desk Operations\",\"col\":4}},{\"id\":\"reports_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"billing_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Billing & Maintenance\",\"col\":4}}]",
+ "content": "[{\"id\":\"FD_HDR\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Front Desk &amp; Quick Actions</span>\",\"col\":12}},{\"id\":\"AFikpVG8G_\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Front Desk Console\",\"col\":4}},{\"id\":\"LmjeZv2AcL\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tape Chart\",\"col\":4}},{\"id\":\"is7sVl6bVG\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Availability Tool\",\"col\":4}},{\"id\":\"hk_short\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Housekeeping View\",\"col\":4}},{\"id\":\"res_short\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hotel Reservation\",\"col\":4}},{\"id\":\"room_short\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hotel Room\",\"col\":4}},{\"id\":\"settings_short\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Hotel Settings\",\"col\":4}},{\"id\":\"frontdesk_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Front Desk Operations\",\"col\":4}},{\"id\":\"reports_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Reports\",\"col\":4}},{\"id\":\"billing_card\",\"type\":\"card\",\"data\":{\"card_name\":\"Billing & Maintenance\",\"col\":4}}]",
  "creation": "2026-01-17 20:44:38.076236",
  "custom_blocks": [],
  "docstatus": 0,
@@ -170,7 +170,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-11-05 00:00:00.000000",
+ "modified": "2026-11-05 02:00:00.000000",
  "modified_by": "Administrator",
  "module": "Hospitality Core",
  "name": "Hotel",
@@ -201,6 +201,13 @@
    "doc_view": "List",
    "label": "Availability Tool",
    "link_to": "availability-tool",
+   "type": "Page"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Housekeeping View",
+   "link_to": "housekeeping_view",
    "type": "Page"
   },
   {

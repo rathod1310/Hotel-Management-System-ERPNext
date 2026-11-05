@@ -1,0 +1,27 @@
+{
+ "content": null,
+ "creation": "2026-11-05 02:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2026-11-05 02:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Hospitality Core",
+ "name": "housekeeping_view",
+ "owner": "Administrator",
+ "page_name": "housekeeping_view",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Hospitality Manager"
+  },
+  {
+   "role": "Hospitality User"
+  }
+ ],
+ "standard": "Yes",
+ "title": "Housekeeping View"
+}
+

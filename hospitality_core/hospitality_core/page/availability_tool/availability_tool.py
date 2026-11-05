@@ -34,6 +34,9 @@ def check_availability_counts(start_date, end_date):
         if room.current_status == RoomStatus.OUT_OF_ORDER:
             status = RoomStatus.OUT_OF_ORDER
             details = "Maintenance"
+        elif room.current_status == RoomStatus.DIRTY:
+            status = RoomStatus.DIRTY
+            details = "Housekeeping (Dirty)"
         elif res:
             if res.status == ReservationStatus.CHECKED_IN:
                 status = RoomStatus.OCCUPIED
@@ -52,7 +55,7 @@ def check_availability_counts(start_date, end_date):
             summary_map[room.room_type] = {"room_type": room.room_type, "total": 0, "occupied": 0, "available": 0}
 
         summary_map[room.room_type]["total"] += 1
-        if status in [RoomStatus.OCCUPIED, ReservationStatus.RESERVED, RoomStatus.OUT_OF_ORDER]:
+        if status in [RoomStatus.OCCUPIED, ReservationStatus.RESERVED, RoomStatus.OUT_OF_ORDER, RoomStatus.DIRTY]:
             summary_map[room.room_type]["occupied"] += 1
         else:
             summary_map[room.room_type]["available"] += 1

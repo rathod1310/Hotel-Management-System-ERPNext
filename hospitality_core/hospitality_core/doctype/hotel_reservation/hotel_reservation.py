@@ -81,7 +81,8 @@ def get_available_rooms(room_type, check_in_date, check_out_date, exclude_reserv
         fields=["name", "room_number", "status", "floor"]
     )
 
-    all_rooms = [r for r in all_rooms if r.status != RoomStatus.OUT_OF_ORDER]
+    # Exclude currently Out of Order and Dirty rooms from selection
+    all_rooms = [r for r in all_rooms if r.status not in (RoomStatus.OUT_OF_ORDER, RoomStatus.DIRTY)]
 
     booked_rooms = frappe.db.sql("""
         SELECT DISTINCT s.room

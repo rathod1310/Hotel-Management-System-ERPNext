@@ -38,13 +38,13 @@ def execute(filters=None):
     while curr_date <= end_date:
         str_date = curr_date.strftime("%Y-%m-%d")
 
-        ooo_data = frappe.db.sql("""
+        unavailable_data = frappe.db.sql("""
             SELECT room_type, COUNT(name) as cnt
             FROM `tabHotel Room`
-            WHERE status = 'Out of Order' AND is_enabled = 1
+            WHERE status IN ('Out of Order', 'Dirty') AND is_enabled = 1
             GROUP BY room_type
         """, as_dict=True)
-        ooo_map = {o.room_type: o.cnt for o in ooo_data}
+        ooo_map = {o.room_type: o.cnt for o in unavailable_data}
 
         sold_data = frappe.db.sql("""
             SELECT s.room_type, COUNT(DISTINCT s.room) as cnt

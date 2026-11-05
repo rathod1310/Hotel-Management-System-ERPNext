@@ -65,7 +65,7 @@ frappe.pages['front-desk-console'].on_page_load = function (wrapper) {
             <div class="row" style="margin-bottom: 20px;">
                 <div class="col-md-2 col-xs-4"><a class="fd-toolbar-btn" onclick="frappe.set_route('tape-chart')">${__("Tape Chart")}</a></div>
                 <div class="col-md-2 col-xs-4"><a class="fd-toolbar-btn" onclick="frappe.set_route('availability-tool')">${__("Availability")}</a></div>
-                <div class="col-md-2 col-xs-4"><a class="fd-toolbar-btn" onclick="frappe.set_route('List', 'Hotel Room', {'status': 'Dirty'})">${__("Housekeeping")}</a></div>
+                <div class="col-md-2 col-xs-4"><a class="fd-toolbar-btn" onclick="frappe.set_route('housekeeping_view')">${__("Housekeeping")}</a></div>
                 <div class="col-md-2 col-xs-4"><a class="fd-toolbar-btn" onclick="frappe.set_route('List', 'Hotel Reservation')">${__("Reservations")}</a></div>
                 <div class="col-md-2 col-xs-4"><a class="fd-toolbar-btn" onclick="frappe.set_route('query-report', 'House List')">${__("House List")}</a></div>
                 <div class="col-md-2 col-xs-4"><a class="fd-toolbar-btn" onclick="frappe.set_route('List', 'Issue', {'hotel_room': ['!=', '']})">${__("Maintenance")}</a></div>
